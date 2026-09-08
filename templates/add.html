@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Добавление услуги</title>
+
+    <link rel="stylesheet" href="/static/styles/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+
+    <main class="screen add-screen">
+
+        <h1 class="page-title">
+            Новый электроприбор
+        </h1>
+
+        <form
+                class="add-form"
+                action="/add"
+                method="POST"
+                enctype="multipart/form-data">
+
+            <label>
+                Название
+
+                <input
+                        type="text"
+                        name="name"
+                        placeholder="Чайник">
+            </label>
+
+            <label>
+                Мощность, кВт
+
+                <input
+                        id="power"
+                        type="number"
+                        name="power"
+                        min="0"
+                        step="0.1"
+                        placeholder="2.0">
+            </label>
+
+            <label>
+                Расчётная нагрузка на сеть 220 В, А
+
+                <input
+                        id="load"
+                        type="number"
+                        placeholder="9.1"
+                        readonly>
+            </label>
+
+            <label>
+                Описание
+
+                <textarea
+                        name="description"
+                        placeholder="Быстро нагревает воду для чая и других горячих напитков."></textarea>
+            </label>
+
+            <div class="uploads">
+
+                <label class="upload-block">
+
+                    <strong>Фото</strong>
+
+                    <input
+                            class="file-input"
+                            type="file"
+                            name="photo"
+                            accept="image/*">
+
+                    <span class="upload-placeholder">
+                        +добавить фото
+                    </span>
+
+                </label>
+
+                <label class="upload-block">
+
+                    <strong>Видео</strong>
+
+                    <input
+                            class="file-input"
+                            type="file"
+                            name="video"
+                            accept="video/*">
+
+                    <span class="upload-placeholder">
+                        +добавить видео
+                    </span>
+
+                </label>
+
+            </div>
+
+            <button
+                    class="main-button"
+                    type="submit">
+                добавить услугу
+            </button>
+
+        </form>
+
+    </main>
+
+    <nav class="bottom-nav">
+
+        <a href="/feed">
+            <span class="nav-symbol">⌂</span>
+            <span class="nav-label">Лента</span>
+        </a>
+
+        <a href="/add" class="active">
+            <span class="nav-symbol">＋</span>
+            <span class="nav-label">Добавить</span>
+        </a>
+
+        <a href="/catalog">
+            <span class="nav-symbol">▦</span>
+            <span class="nav-label">Каталог</span>
+        </a>
+
+    </nav>
+
+</div>
+
+<script src="/static/scripts/app.js"></script>
+
+</body>
+</html>
