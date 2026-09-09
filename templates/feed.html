@@ -3,141 +3,143 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Лента</title>
 
-    <link
-            rel="stylesheet"
-            href="/static/styles/style.css">
+    <link rel="stylesheet" href="/static/styles/style.css">
 </head>
 
 <body>
 
-<div class="phone">
+<div class="app-wrapper">
 
-    <main class="screen feed-screen">
+    <div class="phone-shell">
 
-        <div class="feed-list">
+        <main class="feed-screen">
 
-            {{ range .services }}
+            <video
+                    class="feed-video"
+                    src="{{ .service.Video }}"
+                    poster="{{ .service.Image }}"
+                    autoplay
+                    muted
+                    loop
+                    playsinline>
+            </video>
 
-            <section
-                    class="feed-item"
-                    id="service-{{ .ID }}">
 
-                <video
-                        class="feed-video"
-                        src="{{ .Video }}"
-                        poster="{{ .Image }}"
-                        autoplay
-                        muted
-                        loop
-                        playsinline>
-                </video>
+            <div class="feed-gradient"></div>
 
-                <!-- Затемнение снизу,
-                     чтобы белый текст читался -->
-                <div class="feed-gradient"></div>
 
-                <!-- Информация -->
-                <div class="feed-info">
+            <div class="feed-copy">
 
-                    <h1>
-                        {{ .Name }}
-                    </h1>
+                <h1>
+                    {{ .service.Name }}
+                </h1>
 
-                    <div class="topic-fields">
+                <p>
+                    Мощность:
+                    {{ printf "%.1f" .service.PowerKW }} кВт
+                </p>
 
-                        <span>
-                            Мощность:
-                            {{ printf "%.1f" .PowerKW }} кВт
-                        </span>
+                <p>
+                    Нагрузка на сеть 220 В:
+                    {{ printf "%.1f" .service.CurrentA }} А
+                </p>
 
-                        <span>
-                            Расчётная нагрузка на сеть 220 В:
-                            {{ printf "%.1f" .LoadA }} А
-                        </span>
 
-                    </div>
+                {{ if .showFull }}
 
-                    <p class="feed-description">
-                        {{ .Description }}
-                    </p>
+                <p class="feed-description feed-description-full">
+                    {{ .service.Description }}
+                </p>
 
-                    <button
-                            class="description-toggle"
-                            type="button">
-                        больше
-                    </button>
+                <a
+                        class="feed-more"
+                        href="/feed/{{ .service.ID }}">
+
+                    меньше
+
+                </a>
+
+                {{ else }}
+
+                <p class="feed-description">
+                    {{ .service.Description }}
+                </p>
+
+                <a
+                        class="feed-more"
+                        href="/feed/{{ .service.ID }}?full=1">
+
+                    больше
+
+                </a>
+
+                {{ end }}
+
+            </div>
+
+
+            <div class="feed-actions">
+
+                <div class="feed-like">
+
+                    <span class="feed-heart">
+                        ♡
+                    </span>
+
+                    <span class="feed-like-count">
+                        {{ len .service.LikedBy }}
+                    </span>
 
                 </div>
 
-                <!-- Лайки + следующий -->
-                <div class="feed-actions">
 
-                    <div class="like-block">
+                <a
+                        class="feed-next"
+                        href="/feed/{{ .nextID }}">
 
-                        <div class="heart-circle">
-                            <span class="heart-icon">♡</span>
-                        </div>
+                    ↓
 
-                        <span class="like-count">
-                            {{ .LikeCount }}
-                        </span>
+                </a>
 
-                    </div>
+            </div>
 
-                    <button
-                            class="next-button"
-                            type="button"
-                            title="Следующее видео">
-                        ↓
-                    </button>
+        </main>
 
-                </div>
 
-            </section>
+        <nav class="bottom-nav">
 
-            {{ end }}
+            <a href="/feed/1" class="active">
 
-        </div>
+                <span class="nav-icon">⌂</span>
+                <span class="nav-label">Лента</span>
 
-    </main>
+            </a>
 
-    <nav class="bottom-nav">
 
-        <a
-                href="/feed"
-                class="active">
+            <a href="/add">
 
-            <span class="nav-symbol">⌂</span>
-            <span class="nav-label">Лента</span>
+                <span class="nav-icon">＋</span>
+                <span class="nav-label">Добавить</span>
 
-        </a>
+            </a>
 
-        <a href="/add">
 
-            <span class="nav-symbol">＋</span>
-            <span class="nav-label">Добавить</span>
+            <a href="/catalog">
 
-        </a>
+                <span class="nav-icon">▦</span>
+                <span class="nav-label">Каталог</span>
 
-        <a href="/catalog">
+            </a>
 
-            <span class="nav-symbol">▦</span>
-            <span class="nav-label">Каталог</span>
+        </nav>
 
-        </a>
-
-    </nav>
+    </div>
 
 </div>
-
-<script src="/static/scripts/app.js"></script>
 
 </body>
 

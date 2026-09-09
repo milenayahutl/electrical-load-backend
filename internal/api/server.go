@@ -16,7 +16,7 @@ func StartServer() {
 
 	repo, err := repository.NewRepository()
 	if err != nil {
-		logrus.Error("Ошибка инициализации репозитория")
+		logrus.Error(err)
 		return
 	}
 
@@ -24,34 +24,26 @@ func StartServer() {
 
 	r := gin.Default()
 
-	// Подключаем HTML-шаблоны.
 	r.LoadHTMLGlob("templates/*")
-
-	// CSS, JS, изображения и видео.
 	r.Static("/static", "./resources")
 
-	// localhost:8080 → лента.
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusFound, "/feed")
+		ctx.Redirect(http.StatusFound, "/feed/1")
 	})
 
-	// Лента с первого элемента.
-	r.GET("/feed", h.GetFeed)
+	r.GET("/feed", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusFound, "/feed/1")
+	})
 
-	// Лента начиная с выбранной карточки.
-	// Например /feed/8.
-	r.GET("/feed/:id", h.GetFeedFromID)
+	r.GET("/feed/:id", h.GetFeed)
 
-	// Добавление.
 	r.GET("/add", h.GetAddPage)
-	r.POST("/add", h.SubmitAddPage)
 
-	// Каталог.
 	r.GET("/catalog", h.GetCatalog)
 
-	err = r.Run(":8080")
-	if err != nil {
+	if err := r.Run(":8080"); err != nil {
 		logrus.Error(err)
+		return
 	}
 
 	log.Println("Server down")

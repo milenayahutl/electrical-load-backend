@@ -3,154 +3,145 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0">
+    <title>Каталог</title>
 
-    <title>Каталог услуг</title>
-
-    <link
-            rel="stylesheet"
-            href="/static/styles/style.css">
+    <link rel="stylesheet" href="/static/styles/style.css">
 </head>
 
 <body>
 
-<div class="phone">
+<div class="app-wrapper">
 
-    <main class="screen catalog-screen">
+    <div class="phone-shell">
 
-        <h1 class="page-title">
-            Каталог
-        </h1>
+        <main class="catalog-page">
 
-        <form
-                class="power-filter"
-                action="/catalog"
-                method="GET">
+            <h1 class="screen-title">
+                Каталог
+            </h1>
 
-            <span>
-                Мощность до
-            </span>
 
-            <input
-                    type="number"
-                    name="max_power"
-                    min="0"
-                    step="0.1"
-                    placeholder="2.0"
-                    value="{{ .max_power }}">
+            <form
+                    class="filter-form"
+                    action="/catalog"
+                    method="GET">
 
-            <span>
-                кВт
-            </span>
+                <span>
+                    Мощность до
+                </span>
 
-            <button type="submit">
-                найти
-            </button>
+                <input
+                        type="number"
+                        name="max_power"
+                        min="0"
+                        step="0.1"
+                        placeholder="0"
+                        value="{{ .max_power }}">
 
-        </form>
+                <span>
+                    кВт
+                </span>
 
-        {{ if .filterError }}
+                <button type="submit">
+                    найти
+                </button>
 
-        <p class="filter-error">
-            {{ .filterError }}
-        </p>
+            </form>
 
-        {{ end }}
 
-        {{ if .services }}
+            {{ if .filterError }}
 
-        <div class="catalog-grid">
-
-            {{ range .services }}
-
-            <a
-                    class="catalog-card"
-                    href="/feed/{{ .ID }}">
-
-                <!-- Количество лайков -->
-                <div class="card-likes">
-
-                    <span>
-                        ♡
-                    </span>
-
-                    <span>
-                        {{ .LikeCount }}
-                    </span>
-
-                </div>
-
-                <div class="catalog-image">
-
-                    <img
-                            src="{{ .Image }}"
-                            alt="{{ .Name }}">
-
-                </div>
-
-                <div class="catalog-info">
-
-                    <h2>
-                        {{ .Name }}
-                    </h2>
-
-                    <!-- Именно это поле
-                         используется для фильтра -->
-                    <p class="catalog-power">
-                        {{ printf "%.1f" .PowerKW }} кВт
-                    </p>
-
-                    <span class="catalog-more">
-                        Подробнее
-                    </span>
-
-                </div>
-
-            </a>
+            <p class="filter-error">
+                {{ .filterError }}
+            </p>
 
             {{ end }}
 
-        </div>
 
-        {{ else }}
+            {{ if .services }}
 
-        <p class="empty-result">
-            Подходящих электроприборов нет.
-        </p>
+            <div class="catalog-grid">
 
-        {{ end }}
+                {{ range .services }}
 
-    </main>
+                <article class="service-card">
 
-    <nav class="bottom-nav">
+                    <div class="card-image-wrap">
 
-        <a href="/feed">
+                        <img
+                                src="{{ .Image }}"
+                                alt="{{ .Name }}">
 
-            <span class="nav-symbol">⌂</span>
-            <span class="nav-label">Лента</span>
+                        <span class="card-like">
+                            ♡ {{ len .LikedBy }}
+                        </span>
 
-        </a>
+                    </div>
 
-        <a href="/add">
 
-            <span class="nav-symbol">＋</span>
-            <span class="nav-label">Добавить</span>
+                    <div class="card-body">
 
-        </a>
+                        <h2>
+                            {{ .Name }}
+                        </h2>
 
-        <a
-                href="/catalog"
-                class="active">
+                        <p>
+                            {{ printf "%.1f" .PowerKW }} кВт
+                        </p>
 
-            <span class="nav-symbol">▦</span>
-            <span class="nav-label">Каталог</span>
+                        <a href="/feed/{{ .ID }}?full=1">
+                            Подробнее
+                        </a>
 
-        </a>
+                    </div>
 
-    </nav>
+                </article>
+
+                {{ end }}
+
+            </div>
+
+            {{ else }}
+
+            <p class="empty-result">
+                Приборы с такой мощностью не найдены.
+            </p>
+
+            {{ end }}
+
+        </main>
+
+
+        <nav class="bottom-nav">
+
+            <a href="/feed/1">
+
+                <span class="nav-icon">⌂</span>
+                <span class="nav-label">Лента</span>
+
+            </a>
+
+
+            <a href="/add">
+
+                <span class="nav-icon">＋</span>
+                <span class="nav-label">Добавить</span>
+
+            </a>
+
+
+            <a href="/catalog" class="active">
+
+                <span class="nav-icon">▦</span>
+                <span class="nav-label">Каталог</span>
+
+            </a>
+
+        </nav>
+
+    </div>
 
 </div>
 
