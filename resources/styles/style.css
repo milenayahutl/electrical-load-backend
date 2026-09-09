@@ -1,7 +1,3 @@
-/* =========================================================
-   0. ОБЩИЕ НАСТРОЙКИ
-   ========================================================= */
-
 * {
     box-sizing: border-box;
 }
@@ -33,10 +29,6 @@ body {
 }
 
 
-/*
-Чтобы input / button / textarea
-не включали свой странный браузерный шрифт.
-*/
 button,
 input,
 textarea,
@@ -92,7 +84,7 @@ Figma: 1080 × 1920
 .screen-title {
     margin: 0 0 18px;
 
-    color: #48c9c3;
+    color: #00b9ad;
 
     font-size: 27px;
     line-height: 1.1;
@@ -151,7 +143,7 @@ Figma: 1080 × 1920
 
 /* Активная вкладка */
 .bottom-nav a.active {
-    color: #48c9c3;
+    color: #00b9ad;
 }
 
 
@@ -168,7 +160,7 @@ Figma: 1080 × 1920
 
     border-radius: 2px;
 
-    background: #48c9c3;
+    background: #00b9ad;
 }
 
 
@@ -344,7 +336,7 @@ Figma: 1080 × 1920
 
 .feed-heart,
 .heart {
-    color: #48c9c3;
+    color: #00b9ad;
 
     font-size: 29px;
     line-height: 28px;
@@ -375,7 +367,7 @@ Figma: 1080 × 1920
 
     background: rgba(25, 25, 25, 0.68);
 
-    color: #48c9c3;
+    color: #00b9ad;
 
     text-decoration: none;
 
@@ -563,7 +555,7 @@ type="button", поэтому без JS она
 
     padding: 9px 23px;
 
-    background: #48c9c3;
+    background: #00b9ad;
 
     color: #ffffff;
 
@@ -653,7 +645,7 @@ type="button", поэтому без JS она
 
     padding: 8px 17px;
 
-    background: #48c9c3;
+    background: #00b9ad;
 
     color: #ffffff;
 
@@ -665,7 +657,7 @@ type="button", поэтому без JS она
 }
 
 .filter-form button:hover {
-    background: #42bdb7;
+    background: #00b9ad;
 }
 
 .filter-error {
@@ -707,7 +699,7 @@ type="button", поэтому без JS она
 
     background: #ffffff;
 
-    border: 1px solid #d5d9de;
+    border: 1px solid #d8dee4;
 
     border-radius: 7px;
 }
@@ -789,7 +781,7 @@ type="button", поэтому без JS она
 }
 
 .card-body a {
-    color: #48c9c3;
+    color: #00b9ad;
 
     text-decoration: none;
 

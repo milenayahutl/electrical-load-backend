@@ -12,8 +12,7 @@ func NewRepository() (*Repository, error) {
 	return &Repository{}, nil
 }
 
-// Service — одна услуга, то есть один электроприбор.
-type Service struct {
+type Appliance struct {
 	ID          int
 	Name        string
 	PowerKW     float64
@@ -30,20 +29,18 @@ const (
 	StatusDeleted   = "удален"
 )
 
-// CurrentA рассчитывает нагрузку на сеть 220 В
 // I = P / U
-// Мощность переводим из кВт в Вт.
-func (s Service) CurrentA() float64 {
+func (s Appliance) CurrentA() float64 {
 	current := s.PowerKW * 1000 / 220
 
 	return math.Round(current*10) / 10
 }
 
-// GetServices возвращает все услуги.
-func (r *Repository) GetServices() ([]Service, error) {
+// возвращает все услуги
+func (r *Repository) GetServices() ([]Appliance, error) {
 	const media = "http://localhost:9000/media/"
 
-	services := []Service{
+	services := []Appliance{
 		{
 			ID:      1,
 			Name:    "Электрический чайник",
@@ -141,10 +138,10 @@ func (r *Repository) GetServices() ([]Service, error) {
 	return services, nil
 }
 
-func (r *Repository) GetService(id int) (Service, error) {
+func (r *Repository) GetService(id int) (Appliance, error) {
 	services, err := r.GetPublishedServices()
 	if err != nil {
-		return Service{}, err
+		return Appliance{}, err
 	}
 
 	for _, service := range services {
@@ -153,17 +150,17 @@ func (r *Repository) GetService(id int) (Service, error) {
 		}
 	}
 
-	return Service{}, fmt.Errorf("услуга не найдена")
+	return Appliance{}, fmt.Errorf("услуга не найдена")
 }
 
 // возвращает только опубликованные услуги
-func (r *Repository) GetPublishedServices() ([]Service, error) {
+func (r *Repository) GetPublishedServices() ([]Appliance, error) {
 	services, err := r.GetServices()
 	if err != nil {
 		return nil, err
 	}
 
-	var result []Service
+	var result []Appliance
 
 	for _, service := range services {
 		if service.Status == StatusPublished {
@@ -174,11 +171,11 @@ func (r *Repository) GetPublishedServices() ([]Service, error) {
 	return result, nil
 }
 
-// GetDraftService возвращает услугу в статусе "черновик".
-func (r *Repository) GetDraftService() (Service, error) {
+// возвращает услугу в статусе черновик
+func (r *Repository) GetDraftService() (Appliance, error) {
 	services, err := r.GetServices()
 	if err != nil {
-		return Service{}, err
+		return Appliance{}, err
 	}
 
 	for _, service := range services {
@@ -187,17 +184,16 @@ func (r *Repository) GetDraftService() (Service, error) {
 		}
 	}
 
-	return Service{}, fmt.Errorf("черновик не найден")
+	return Appliance{}, fmt.Errorf("черновик не найден")
 }
 
-// Показываем приборы с мощностью НЕ БОЛЬШЕ введённой.
-func (r *Repository) GetServicesByMaxPower(maxPower float64) ([]Service, error) {
+func (r *Repository) GetServicesByMaxPower(maxPower float64) ([]Appliance, error) {
 	services, err := r.GetPublishedServices()
 	if err != nil {
 		return nil, err
 	}
 
-	var result []Service
+	var result []Appliance
 
 	for _, service := range services {
 		if service.PowerKW <= maxPower {
@@ -233,8 +229,8 @@ func (r *Repository) GetNextServiceID(currentID int) (int, error) {
 			minID = service.ID
 		}
 
-		// Ищем минимальный существующий ID,
-		// который БОЛЬШЕ текущего.
+		// ищем минимальный существующий ID,
+		// который > текущего
 		if service.ID > currentID {
 
 			if nextID == -1 || service.ID < nextID {
@@ -247,8 +243,8 @@ func (r *Repository) GetNextServiceID(currentID int) (int, error) {
 		return 0, fmt.Errorf("услуга не найдена")
 	}
 
-	// Если текущая карточка последняя —
-	// возвращаемся к первой опубликованной.
+	// если текущая карточка последняя
+	// возвращаемся к первой
 	if nextID == -1 {
 		return minID, nil
 	}
