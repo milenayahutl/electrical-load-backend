@@ -36,7 +36,6 @@ select {
     font: inherit;
 }
 
-
 /* =========================================================
    1. ОБЁРТКА И ЭКРАН ТЕЛЕФОНА
    ========================================================= */
@@ -52,13 +51,6 @@ select {
 }
 
 
-/*
-Figma: 1080 × 1920
-Пропорция остаётся 9:16.
-
-Для браузера используем:
-405 × 720.
-*/
 .phone-shell {
     width: 405px;
     height: 720px;
@@ -181,7 +173,7 @@ Figma: 1080 × 1920
 }
 
 
-/* Видео занимает ВСЮ область над нижним меню */
+/* Видео занимает всю область над нижним меню */
 .feed-video {
     position: absolute;
 
@@ -198,7 +190,7 @@ Figma: 1080 × 1920
 }
 
 
-/* Затемнение снизу как в Figma */
+/* Затемнение снизу */
 .feed-gradient {
     position: absolute;
 
@@ -258,10 +250,7 @@ Figma: 1080 × 1920
 }
 
 
-/*
-Ограничиваем описание,
-чтобы оно не занимало пол-экрана.
-*/
+/* Ограничиваем описание */
 .feed-description {
     display: -webkit-box;
 
@@ -271,9 +260,45 @@ Figma: 1080 × 1920
     -webkit-box-orient: vertical;
 }
 
-.feed-description-full {
+.description-toggle {
+    position: absolute;
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+/* Когда галочка включена —
+   показываем описание полностью */
+.description-toggle:checked + .feed-description {
     display: block;
+
     overflow: visible;
+
+    -webkit-line-clamp: unset;
+}
+
+
+/* По умолчанию показываем "больше" */
+.less-text {
+    display: none;
+}
+
+
+/* После нажатия прячем "больше" */
+.description-toggle:checked
+~ .feed-more
+.more-text {
+    display: none;
+}
+
+
+/* И показываем "меньше" */
+.description-toggle:checked
+~ .feed-more
+.less-text {
+    display: inline;
 }
 
 /* Ссылка "больше" */
@@ -287,6 +312,8 @@ Figma: 1080 × 1920
     font-size: 12px;
 
     text-decoration: none;
+
+    cursor: pointer;
 }
 
 .feed-more:hover {
@@ -297,12 +324,11 @@ Figma: 1080 × 1920
 /* =========================================================
    5. КНОПКИ СПРАВА В ЛЕНТЕ
    ========================================================= */
-
 .feed-actions {
     position: absolute;
 
     right: 10px;
-    top: 43%;
+    bottom: 90px;
 
     z-index: 3;
 
@@ -311,15 +337,14 @@ Figma: 1080 × 1920
 
     align-items: center;
 
-    gap: 16px;
+    gap: 9px;
 }
 
 
-/* Лайк */
-.feed-like,
-.like-display {
-    width: 46px;
-    min-height: 58px;
+/* Общий вид параметров */
+.feed-parameter {
+    width: 50px;
+    height: 50px;
 
     display: flex;
     flex-direction: column;
@@ -327,36 +352,66 @@ Figma: 1080 × 1920
     justify-content: center;
     align-items: center;
 
-    border-radius: 24px;
+    border-radius: 50%;
 
     background: rgba(25, 25, 25, 0.68);
 
     color: #ffffff;
 }
 
-.feed-heart,
-.heart {
-    color: #00b9ad;
+.feed-parameter-value {
+    font-size: 12px;
+    line-height: 14px;
 
-    font-size: 29px;
-    line-height: 28px;
+    font-weight: 700;
 }
 
-.feed-like-count,
-.like-count {
-    margin-top: 4px;
+.feed-parameter-unit {
+    margin-top: 1px;
+
+    font-size: 10px;
+    line-height: 11px;
+
+    color: #00b9ad;
+}
+
+
+/* Лайк */
+.feed-like {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+
+    background: rgba(25, 25, 25, 0.68);
 
     color: #ffffff;
+}
 
-    font-size: 12px;
+.feed-heart {
+    color: #00b9ad;
+
+    font-size: 25px;
+    line-height: 23px;
+}
+
+.feed-like-count {
+    color: #ffffff;
+
+    font-size: 11px;
 }
 
 
-/* Стрелка на следующую карточку */
-.feed-next,
-.next-button {
-    width: 46px;
-    height: 46px;
+/* Следующий прибор */
+.feed-next {
+    width: 50px;
+    height: 50px;
 
     display: flex;
 
@@ -372,10 +427,7 @@ Figma: 1080 × 1920
     text-decoration: none;
 
     font-size: 30px;
-    line-height: 1;
 }
-
-
 /* =========================================================
    6. СТРАНИЦА ДОБАВЛЕНИЯ
    ========================================================= */
@@ -400,42 +452,40 @@ Figma: 1080 × 1920
    7. ФОТО И ВИДЕО НА СТРАНИЦЕ ДОБАВЛЕНИЯ
    ========================================================= */
 
-.add-media-row {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
+.add-media-stack {
+    display: flex;
+    flex-direction: column;
 
     gap: 18px;
 
-    margin-bottom: 17px;
+    margin-bottom: 20px;
 }
 
-.add-media-column {
-    min-width: 0;
+
+.media-picker {
+    display: block;
+
+    cursor: pointer;
 }
+
 
 .add-media-title {
+    display: block;
+
     margin-bottom: 7px;
 
     color: #1d2126;
 
     font-size: 14px;
-
     font-weight: 700;
 }
 
 
-/*
-Это просто просмотр.
-
-Никаких file-input здесь уже нет.
-*/
-.add-media-preview {
+.add-media-preview-wide {
     width: 100%;
-    height: 148px;
+    height: 175px;
 
     display: flex;
-
     justify-content: center;
     align-items: center;
 
@@ -446,30 +496,39 @@ Figma: 1080 × 1920
     background: #eeeeee;
 }
 
-.add-media-preview img,
-.add-media-preview video {
+
+.add-media-preview-wide img,
+.add-media-preview-wide video {
     width: 100%;
     height: 100%;
 
     display: block;
 
-    object-fit: contain;
-}
+    object-fit: cover;
 
-.media-empty {
-    padding: 12px;
-
-    color: #999999;
-
-    font-size: 12px;
-    line-height: 1.3;
-
-    text-align: center;
-
-    font-style: italic;
+    pointer-events: none;
 }
 
 
+.media-picker-hint {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #777d84;
+
+    font-size: 11px;
+}
+
+
+.media-file-input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
 /* =========================================================
    8. ФОРМА ДОБАВЛЕНИЯ
    ========================================================= */
@@ -537,36 +596,6 @@ Figma: 1080 × 1920
     font-style: italic;
 }
 
-
-/*
-Кнопка визуальная.
-
-type="button", поэтому без JS она
-ничего не отправляет и ничего не сохраняет.
-*/
-.main-button {
-    display: block;
-
-    margin: 19px auto 0;
-
-    border: none;
-
-    border-radius: 22px;
-
-    padding: 9px 23px;
-
-    background: #00b9ad;
-
-    color: #ffffff;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    cursor: default;
-}
-
-
 /* =========================================================
    9. КАТАЛОГ
    ========================================================= */
@@ -592,51 +621,113 @@ type="button", поэтому без JS она
     margin-bottom: 18px;
 }
 
+.filter-title {
+    margin-bottom: 8px;
+
+    color: #20252d;
+
+    font-size: 14px;
+    font-weight: 700;
+}
 
 /* =========================================================
    10. ФИЛЬТР ПО МОЩНОСТИ
    ========================================================= */
 
 .filter-form {
-    display: flex;
+    display: block;
 
-    align-items: center;
-
-    gap: 7px;
-
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 
     color: #5e646c;
 
     font-size: 12px;
 }
 
-.filter-form input {
-    width: 76px;
-    height: 31px;
+
+.filter-values {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+}
+
+
+.dual-range {
+    position: relative;
+
+    height: 30px;
+
+    margin-bottom: 9px;
+}
+
+
+.dual-range::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 13px;
+
+    height: 4px;
+
+    border-radius: 4px;
+
+    background: #d8dee4;
+}
+
+
+.range-input {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 30px;
+
+    margin: 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    background: transparent;
+
+    pointer-events: none;
+}
+
+
+.range-input::-webkit-slider-runnable-track {
+    height: 4px;
+
+    background: transparent;
+}
+
+
+.range-input::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+
+    margin-top: -7px;
 
     border: none;
+    border-radius: 50%;
 
-    outline: none;
+    background: #00b9ad;
 
-    border-radius: 9px;
+    -webkit-appearance: none;
 
-    padding: 5px 8px;
+    pointer-events: auto;
 
-    background: #ececec;
-
-    color: #555b62;
-
-    text-align: center;
-
-    font-size: 13px;
+    cursor: pointer;
 }
 
-.filter-form input:focus {
-    outline: 2px solid rgba(72, 201, 195, 0.30);
-}
 
 .filter-form button {
+    display: block;
+
     margin-left: auto;
 
     border: none;
@@ -650,24 +741,10 @@ type="button", поэтому без JS она
     color: #ffffff;
 
     font-size: 12px;
-
     font-weight: 600;
 
     cursor: pointer;
 }
-
-.filter-form button:hover {
-    background: #00b9ad;
-}
-
-.filter-error {
-    margin: -5px 0 10px;
-
-    color: #b94747;
-
-    font-size: 11px;
-}
-
 
 /* =========================================================
    11. СЕТКА КАТАЛОГА
@@ -686,10 +763,6 @@ type="button", поэтому без JS она
    12. КАРТОЧКА КАТАЛОГА
    ========================================================= */
 
-/*
-Ближе к Gorenje и твоему Figma:
-белая карточка + тонкая серая рамка.
-*/
 .service-card {
     position: relative;
 
@@ -837,9 +910,7 @@ type="button", поэтому без JS она
 }
 
 
-/* =========================================================
-   20. ЕСЛИ ОКНО БРАУЗЕРА СЛИШКОМ МАЛЕНЬКОЕ
-   ========================================================= */
+/* ЕСЛИ ОКНО БРАУЗЕРА СЛИШКОМ МАЛЕНЬКОЕ */
 
 @media (max-height: 770px) and (min-width: 500px) {
 

@@ -12,7 +12,7 @@ func NewRepository() (*Repository, error) {
 	return &Repository{}, nil
 }
 
-type Appliance struct {
+type ElectricityConsumer struct {
 	ID          int
 	Name        string
 	PowerKW     float64
@@ -30,17 +30,17 @@ const (
 )
 
 // I = P / U
-func (s Appliance) CurrentA() float64 {
-	current := s.PowerKW * 1000 / 220
+func (c ElectricityConsumer) CurrentA() float64 {
+	current := c.PowerKW * 1000 / 220
 
 	return math.Round(current*10) / 10
 }
 
-// возвращает все услуги
-func (r *Repository) GetServices() ([]Appliance, error) {
+// возвращает всех электропотребителей
+func (r *Repository) GetElectricityConsumers() ([]ElectricityConsumer, error) {
 	const media = "http://localhost:9000/media/"
 
-	services := []Appliance{
+	electricityConsumers := []ElectricityConsumer{
 		{
 			ID:      1,
 			Name:    "Электрический чайник",
@@ -131,40 +131,40 @@ func (r *Repository) GetServices() ([]Appliance, error) {
 		},
 	}
 
-	if len(services) == 0 {
-		return nil, fmt.Errorf("массив услуг пустой")
+	if len(electricityConsumers) == 0 {
+		return nil, fmt.Errorf("массив электропотребителей пустой")
 	}
 
-	return services, nil
+	return electricityConsumers, nil
 }
 
-func (r *Repository) GetService(id int) (Appliance, error) {
-	services, err := r.GetPublishedServices()
+func (r *Repository) GetElectricityConsumer(id int) (ElectricityConsumer, error) {
+	electricityConsumers, err := r.GetPublishedElectricityConsumers()
 	if err != nil {
-		return Appliance{}, err
+		return ElectricityConsumer{}, err
 	}
 
-	for _, service := range services {
-		if service.ID == id {
-			return service, nil
+	for _, electricityConsumer := range electricityConsumers {
+		if electricityConsumer.ID == id {
+			return electricityConsumer, nil
 		}
 	}
 
-	return Appliance{}, fmt.Errorf("услуга не найдена")
+	return ElectricityConsumer{}, fmt.Errorf("электропотребитель не найден")
 }
 
-// возвращает только опубликованные услуги
-func (r *Repository) GetPublishedServices() ([]Appliance, error) {
-	services, err := r.GetServices()
+// возвращает только опубликованные электропотребители
+func (r *Repository) GetPublishedElectricityConsumers() ([]ElectricityConsumer, error) {
+	electricityConsumers, err := r.GetElectricityConsumers()
 	if err != nil {
 		return nil, err
 	}
 
-	var result []Appliance
+	var result []ElectricityConsumer
 
-	for _, service := range services {
-		if service.Status == StatusPublished {
-			result = append(result, service)
+	for _, electricityConsumer := range electricityConsumers {
+		if electricityConsumer.Status == StatusPublished {
+			result = append(result, electricityConsumer)
 		}
 	}
 
@@ -172,69 +172,81 @@ func (r *Repository) GetPublishedServices() ([]Appliance, error) {
 }
 
 // возвращает услугу в статусе черновик
-func (r *Repository) GetDraftService() (Appliance, error) {
-	services, err := r.GetServices()
+func (r *Repository) GetDraftElectricityConsumer() (ElectricityConsumer, error) {
+	electricityConsumers, err := r.GetElectricityConsumers()
 	if err != nil {
-		return Appliance{}, err
+		return ElectricityConsumer{}, err
 	}
 
-	for _, service := range services {
-		if service.Status == StatusDraft {
-			return service, nil
+	for _, electricityConsumer := range electricityConsumers {
+		if electricityConsumer.Status == StatusDraft {
+			return electricityConsumer, nil
 		}
 	}
 
-	return Appliance{}, fmt.Errorf("черновик не найден")
+	return ElectricityConsumer{}, fmt.Errorf("черновик не найден")
 }
 
-func (r *Repository) GetServicesByMaxPower(maxPower float64) ([]Appliance, error) {
-	services, err := r.GetPublishedServices()
+func (r *Repository) GetElectricityConsumersByPowerRange(
+	minPower float64,
+	maxPower float64,
+) ([]ElectricityConsumer, error) {
+
+	electricityConsumers, err :=
+		r.GetPublishedElectricityConsumers()
+
 	if err != nil {
 		return nil, err
 	}
 
-	var result []Appliance
+	var result []ElectricityConsumer
 
-	for _, service := range services {
-		if service.PowerKW <= maxPower {
-			result = append(result, service)
+	for _, electricityConsumer := range electricityConsumers {
+
+		if electricityConsumer.PowerKW >= minPower &&
+			electricityConsumer.PowerKW <= maxPower {
+
+			result = append(
+				result,
+				electricityConsumer,
+			)
 		}
 	}
 
 	return result, nil
 }
 
-func (r *Repository) GetNextServiceID(currentID int) (int, error) {
-	services, err := r.GetPublishedServices()
+func (r *Repository) GetNextElectricityConsumerID(currentID int) (int, error) {
+	electricityConsumers, err := r.GetPublishedElectricityConsumers()
 	if err != nil {
 		return 0, err
 	}
 
-	if len(services) == 0 {
+	if len(electricityConsumers) == 0 {
 		return 0, fmt.Errorf("нет опубликованных услуг")
 	}
 
 	currentExists := false
 
-	minID := services[0].ID
+	minID := electricityConsumers[0].ID
 	nextID := -1
 
-	for _, service := range services {
+	for _, electricityConsumer := range electricityConsumers {
 
-		if service.ID == currentID {
+		if electricityConsumer.ID == currentID {
 			currentExists = true
 		}
 
-		if service.ID < minID {
-			minID = service.ID
+		if electricityConsumer.ID < minID {
+			minID = electricityConsumer.ID
 		}
 
 		// ищем минимальный существующий ID,
 		// который > текущего
-		if service.ID > currentID {
+		if electricityConsumer.ID > currentID {
 
-			if nextID == -1 || service.ID < nextID {
-				nextID = service.ID
+			if nextID == -1 || electricityConsumer.ID < nextID {
+				nextID = electricityConsumer.ID
 			}
 		}
 	}

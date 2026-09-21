@@ -19,15 +19,45 @@
                 Новый электроприбор
             </h1>
 
-            <div class="add-media-row">
+            <div class="add-media-stack">
 
-                <div class="add-media-column">
+                <label class="media-picker">
 
-                    <div class="add-media-title">
-                        Фото
+                    <span class="add-media-title">
+                        Видео
+                    </span>
+
+                    <div class="add-media-preview-wide">
+
+                        <video
+                                src="{{ .draft.Video }}"
+                                muted
+                                autoplay
+                                loop
+                                playsinline>
+                        </video>
+
                     </div>
 
-                    <div class="add-media-preview">
+                    <span class="media-picker-hint">
+                        Нажмите, чтобы выбрать другое видео
+                    </span>
+
+                    <input
+                            class="media-file-input"
+                            type="file"
+                            accept="video/*">
+
+                </label>
+
+
+                <label class="media-picker">
+
+                <span class="add-media-title">
+                    Фото
+                </span>
+
+                    <div class="add-media-preview-wide">
 
                         <img
                                 src="{{ .draft.Image }}"
@@ -35,41 +65,21 @@
 
                     </div>
 
-                </div>
+                    <span class="media-picker-hint">
+                        Нажмите, чтобы выбрать другое фото
+                    </span>
 
+                    <input
+                            class="media-file-input"
+                            type="file"
+                            accept="image/*">
 
-                <div class="add-media-column">
-
-                    <div class="add-media-title">
-                        Видео
-                    </div>
-
-                    <div class="add-media-preview">
-
-                        {{ if .draft.Video }}
-
-                        <video
-                                src="{{ .draft.Video }}"
-                                controls
-                                muted>
-                        </video>
-
-                        {{ else }}
-
-                        <span class="media-empty">
-                            Видео не добавлено
-                        </span>
-
-                        {{ end }}
-
-                    </div>
-
-                </div>
+                </label>
 
             </div>
 
 
-            <form class="draft-form">
+            <div class="draft-form">
 
                 <label class="form-label">
 
@@ -95,20 +105,6 @@
 
                 </label>
 
-
-                <label class="form-label">
-
-                    Расчётная нагрузка на сеть 220В, А
-
-                    <input
-                            class="form-input"
-                            type="number"
-                            step="0.1"
-                            value='{{ printf "%.1f" .draft.CurrentA }}'>
-
-                </label>
-
-
                 <label class="form-label">
 
                     Описание
@@ -118,37 +114,24 @@
 
                 </label>
 
-
-                <!--
-                Это намеренно НЕ submit.
-                Никакой записи в ЛР1 не происходит.
-                -->
-                <button
-                        class="main-button"
-                        type="button">
-
-                    Сохранить
-
-                </button>
-
-            </form>
+            </div>
 
         </main>
 
 
         <nav class="bottom-nav">
 
-            <a href="/feed/1">
+            <a href="/electricity_consumers/feed/1">
                 <span class="nav-icon">⌂</span>
                 <span class="nav-text">Лента</span>
             </a>
 
-            <a href="/add" class="active">
+            <a href="/electricity_consumers/add" class="active">
                 <span class="nav-icon">＋</span>
                 <span class="nav-text">Добавить</span>
             </a>
 
-            <a href="/catalog">
+            <a href="/electricity_consumers/catalog">
                 <span class="nav-icon">▦</span>
                 <span class="nav-text">Каталог</span>
             </a>

@@ -1,4 +1,4 @@
-module labs5sem-electrical-load
+module electricity_consumers
 
 go 1.27.1
 

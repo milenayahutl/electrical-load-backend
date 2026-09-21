@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"labs5sem-electrical-load/internal/app/handler"
-	"labs5sem-electrical-load/internal/app/repository"
+	"electricity_consumers/internal/app/handler"
+	"electricity_consumers/internal/app/repository"
 )
 
 func StartServer() {
@@ -28,18 +28,18 @@ func StartServer() {
 	r.Static("/static", "./resources")
 
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusFound, "/feed/1")
+		ctx.Redirect(http.StatusFound, "/electricity_consumers/feed/1")
 	})
 
-	r.GET("/feed", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusFound, "/feed/1")
+	r.GET("/electricity_consumers/feed", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusFound, "/electricity_consumers/feed/1")
 	})
 
-	r.GET("/feed/:id", h.GetFeed)
+	r.GET("/electricity_consumers/feed/:id", h.GetFeed)
 
-	r.GET("/add", h.GetAddPage)
+	r.GET("/electricity_consumers/add", h.GetAddPage)
 
-	r.GET("/catalog", h.GetCatalog)
+	r.GET("/electricity_consumers/catalog", h.GetCatalog)
 
 	if err := r.Run(":8080"); err != nil {
 		logrus.Error(err)

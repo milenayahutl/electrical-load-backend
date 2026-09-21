@@ -22,27 +22,52 @@
                 Каталог
             </h1>
 
+            <div class="filter-title">
+                Фильтр по мощности
+            </div>
+
 
             <form
                     class="filter-form"
-                    action="/catalog"
+                    action="/electricity_consumers/catalog"
                     method="GET">
 
-                <span>
-                    Мощность до
-                </span>
+                <div class="filter-values">
 
-                <input
-                        type="number"
-                        name="max_power"
-                        min="0"
-                        step="0.1"
-                        placeholder="0"
-                        value="{{ .max_power }}">
+                    <span>
+                        от {{ .min_power }} кВт
+                    </span>
 
-                <span>
-                    кВт
-                </span>
+                    <span>
+                        до {{ .max_power }} кВт
+                    </span>
+
+                </div>
+
+
+                <div class="dual-range">
+
+                    <input
+                            class="range-input range-min"
+                            type="range"
+                            name="min_power"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value="{{ .min_power }}">
+
+
+                    <input
+                            class="range-input range-max"
+                            type="range"
+                            name="max_power"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value="{{ .max_power }}">
+
+                </div>
+
 
                 <button type="submit">
                     найти
@@ -60,11 +85,11 @@
             {{ end }}
 
 
-            {{ if .services }}
+            {{ if .electricityConsumers }}
 
             <div class="catalog-grid">
 
-                {{ range .services }}
+                {{ range .electricityConsumers }}
 
                 <article class="service-card">
 
@@ -91,7 +116,7 @@
                             {{ printf "%.1f" .PowerKW }} кВт
                         </p>
 
-                        <a href="/feed/{{ .ID }}?full=1">
+                        <a href="/electricity_consumers/feed/{{ .ID }}">
                             Подробнее
                         </a>
 
@@ -116,26 +141,26 @@
 
         <nav class="bottom-nav">
 
-            <a href="/feed/1">
+            <a href="/electricity_consumers/feed/1">
 
                 <span class="nav-icon">⌂</span>
-                <span class="nav-label">Лента</span>
+                <span class="nav-text">Лента</span>
 
             </a>
 
 
-            <a href="/add">
+            <a href="/electricity_consumers/add">
 
                 <span class="nav-icon">＋</span>
-                <span class="nav-label">Добавить</span>
+                <span class="nav-text">Добавить</span>
 
             </a>
 
 
-            <a href="/catalog" class="active">
+            <a href="/electricity_consumers/catalog" class="active">
 
                 <span class="nav-icon">▦</span>
-                <span class="nav-label">Каталог</span>
+                <span class="nav-text">Каталог</span>
 
             </a>
 

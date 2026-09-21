@@ -20,8 +20,8 @@
 
             <video
                     class="feed-video"
-                    src="{{ .service.Video }}"
-                    poster="{{ .service.Image }}"
+                    src="{{ .electricityConsumer.Video }}"
+                    poster="{{ .electricityConsumer.Image }}"
                     autoplay
                     muted
                     loop
@@ -35,50 +35,33 @@
             <div class="feed-copy">
 
                 <h1>
-                    {{ .service.Name }}
+                    {{ .electricityConsumer.Name }}
                 </h1>
 
-                <p>
-                    Мощность:
-                    {{ printf "%.1f" .service.PowerKW }} кВт
-                </p>
+                <input
+                        class="description-toggle"
+                        type="checkbox"
+                        id="description-toggle-{{ .electricityConsumer.ID }}">
 
-                <p>
-                    Нагрузка на сеть 220 В:
-                    {{ printf "%.1f" .service.CurrentA }} А
-                </p>
-
-
-                {{ if .showFull }}
-
-                <p class="feed-description feed-description-full">
-                    {{ .service.Description }}
-                </p>
-
-                <a
-                        class="feed-more"
-                        href="/feed/{{ .service.ID }}">
-
-                    меньше
-
-                </a>
-
-                {{ else }}
 
                 <p class="feed-description">
-                    {{ .service.Description }}
+                    {{ .electricityConsumer.Description }}
                 </p>
 
-                <a
+
+                <label
                         class="feed-more"
-                        href="/feed/{{ .service.ID }}?full=1">
+                        for="description-toggle-{{ .electricityConsumer.ID }}">
 
-                    больше
+                    <span class="more-text">
+                        больше
+                    </span>
 
-                </a>
+                    <span class="less-text">
+                        меньше
+                    </span>
 
-                {{ end }}
-
+                </label>
             </div>
 
 
@@ -91,17 +74,41 @@
                     </span>
 
                     <span class="feed-like-count">
-                        {{ len .service.LikedBy }}
+                        {{ len .electricityConsumer.LikedBy }}
                     </span>
 
                 </div>
 
 
+                <div class="feed-parameter">
+
+                    <span class="feed-parameter-value">
+                        {{ printf "%.1f" .electricityConsumer.PowerKW }}
+                    </span>
+
+                    <span class="feed-parameter-unit">
+                        кВт
+                    </span>
+
+                </div>
+
+                <div class="feed-parameter">
+
+                    <span class="feed-parameter-value">
+                        {{ printf "%.1f" .electricityConsumer.CurrentA }}
+                    </span>
+
+                    <span class="feed-parameter-unit">
+                        А
+                    </span>
+
+                </div>
+
                 <a
                         class="feed-next"
-                        href="/feed/{{ .nextID }}">
+                        href="/electricity_consumers/feed/{{ .nextID }}">
 
-                    ↓
+                            ↓
 
                 </a>
 
@@ -112,26 +119,26 @@
 
         <nav class="bottom-nav">
 
-            <a href="/feed/1" class="active">
+            <a href="/electricity_consumers/feed/1" class="active">
 
                 <span class="nav-icon">⌂</span>
-                <span class="nav-label">Лента</span>
+                <span class="nav-text">Лента</span>
 
             </a>
 
 
-            <a href="/add">
+            <a href="/electricity_consumers/add">
 
                 <span class="nav-icon">＋</span>
-                <span class="nav-label">Добавить</span>
+                <span class="nav-text">Добавить</span>
 
             </a>
 
 
-            <a href="/catalog">
+            <a href="/electricity_consumers/catalog">
 
                 <span class="nav-icon">▦</span>
-                <span class="nav-label">Каталог</span>
+                <span class="nav-text">Каталог</span>
 
             </a>
 

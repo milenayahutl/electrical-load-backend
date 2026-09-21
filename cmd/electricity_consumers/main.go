@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"labs5sem-electrical-load/internal/api"
+	"electricity_consumers/internal/api"
 )
 
 func main() {

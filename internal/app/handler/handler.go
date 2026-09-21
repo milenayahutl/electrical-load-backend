@@ -8,17 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"labs5sem-electrical-load/internal/app/repository"
+	"electricity_consumers/internal/app/repository"
 )
 
-// Handler связывает HTTP-запросы
-// с методами repository
+// Handler связывает HTTP-запросы с методами repository
 type Handler struct {
 	Repository *repository.Repository
 }
 
-// NewHandler создаёт новый handler
-// и передаёт ему repository
+// NewHandler создаёт новый handler и передаёт ему repository
 func NewHandler(r *repository.Repository) *Handler {
 	return &Handler{
 		Repository: r,
@@ -45,8 +43,7 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 		return
 	}
 
-	// Получаем саму услугу по её ID.
-	service, err := h.Repository.GetService(id)
+	electricityConsumer, err := h.Repository.GetElectricityConsumer(id)
 
 	if err != nil {
 		logrus.Error(err)
@@ -59,7 +56,7 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 		return
 	}
 
-	nextID, err := h.Repository.GetNextServiceID(id)
+	nextID, err := h.Repository.GetNextElectricityConsumerID(id)
 
 	if err != nil {
 		logrus.Error(err)
@@ -72,25 +69,22 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 		return
 	}
 
-	showFull := ctx.Query("full") == "1"
-
 	ctx.HTML(
 		http.StatusOK,
 		"feed.html",
 		gin.H{
-			"service":  service,
-			"nextID":   nextID,
-			"showFull": showFull,
+			"electricityConsumer": electricityConsumer,
+			"nextID":              nextID,
 		},
 	)
 }
 
 // 2. СТРАНИЦА ДОБАВЛЕНИЯ
 
-// GetAddPage показывает существующий черновик.
+// GetAddPage показывает черновик
 func (h *Handler) GetAddPage(ctx *gin.Context) {
 
-	draft, err := h.Repository.GetDraftService()
+	draft, err := h.Repository.GetDraftElectricityConsumer()
 
 	if err != nil {
 		logrus.Error(err)
@@ -114,53 +108,72 @@ func (h *Handler) GetAddPage(ctx *gin.Context) {
 
 // 3. КАТАЛОГ
 
-// GetCatalog показывает все услуги
 func (h *Handler) GetCatalog(ctx *gin.Context) {
-	maxPowerStr := strings.TrimSpace(
-		ctx.Query("max_power"),
+
+	minPowerStr := strings.TrimSpace(
+		ctx.DefaultQuery(
+			"min_power",
+			"0",
+		),
 	)
 
-	var services []repository.Appliance
+	maxPowerStr := strings.TrimSpace(
+		ctx.DefaultQuery(
+			"max_power",
+			"3",
+		),
+	)
+
+	minPower, minErr := strconv.ParseFloat(
+		strings.ReplaceAll(
+			minPowerStr,
+			",",
+			".",
+		),
+		64,
+	)
+
+	maxPower, maxErr := strconv.ParseFloat(
+		strings.ReplaceAll(
+			maxPowerStr,
+			",",
+			".",
+		),
+		64,
+	)
+
+	var electricityConsumers []repository.ElectricityConsumer
 	var err error
 
 	filterError := ""
 
-	if maxPowerStr == "" {
+	if minErr != nil ||
+		maxErr != nil ||
+		minPower < 0 ||
+		maxPower < minPower {
 
-		services, err =
-			h.Repository.GetPublishedServices()
+		filterError =
+			"Введите корректный диапазон мощности."
+
+		electricityConsumers, err =
+			h.Repository.GetPublishedElectricityConsumers()
 
 	} else {
 
-		maxPower, parseErr := strconv.ParseFloat(
-			strings.ReplaceAll(
-				maxPowerStr,
-				",",
-				".",
-			),
-			64,
-		)
-
-		if parseErr != nil || maxPower < 0 {
-
-			filterError = "Введите корректную мощность."
-
-			services, err =
-				h.Repository.GetPublishedServices()
-
-		} else {
-
-			services, err =
-				h.Repository.GetServicesByMaxPower(maxPower)
-		}
+		electricityConsumers, err =
+			h.Repository.GetElectricityConsumersByPowerRange(
+				minPower,
+				maxPower,
+			)
 	}
 
 	if err != nil {
+
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusInternalServerError,
-			"Ошибка получения услуг",
+			"Ошибка получения электропотребителей",
 		)
 
 		return
@@ -170,9 +183,10 @@ func (h *Handler) GetCatalog(ctx *gin.Context) {
 		http.StatusOK,
 		"catalog.html",
 		gin.H{
-			"services":    services,
-			"max_power":   maxPowerStr,
-			"filterError": filterError,
+			"electricityConsumers": electricityConsumers,
+			"min_power":            minPowerStr,
+			"max_power":            maxPowerStr,
+			"filterError":          filterError,
 		},
 	)
 }
