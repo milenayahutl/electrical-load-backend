@@ -922,3 +922,85 @@ select {
         padding: 0;
     }
 }
+
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 6px;
+}
+
+.card-actions form {
+    margin: 0;
+}
+
+.delete-button {
+    border: none;
+    padding: 0;
+
+    background: transparent;
+
+    color: #d9534f;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    text-decoration: underline;
+}
+
+.card-image-object {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    padding: 11px;
+
+    object-fit: contain;
+}
+
+.card-image-object img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: contain;
+}
+
+.form-button {
+    width: 100%;
+
+    margin-top: 8px;
+    padding: 11px 16px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: #00b9ad;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.form-button:hover {
+    opacity: 0.9;
+}
+
+.form-hint {
+    margin: 4px 0 14px;
+
+    color: #777d84;
+
+    font-size: 11px;
+    line-height: 1.35;
+}

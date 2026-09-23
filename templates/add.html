@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Добавление</title>
+
     <link rel="stylesheet" href="/static/styles/style.css">
 </head>
 
@@ -19,15 +22,24 @@
                 Новый электроприбор
             </h1>
 
+
+            {{ if .hasDraft }}
+
+            <!-- =========================================
+                 ЕСТЬ ЧЕРНОВИК -> публикация услуги
+                 ========================================= -->
+
             <div class="add-media-stack">
 
-                <label class="media-picker">
+                <div class="media-picker">
 
                     <span class="add-media-title">
                         Видео
                     </span>
 
                     <div class="add-media-preview-wide">
+
+                        {{ if .draft.Video }}
 
                         <video
                                 src="{{ .draft.Video }}"
@@ -37,49 +49,64 @@
                                 playsinline>
                         </video>
 
+                        {{ else }}
+
+                        <video
+                                src="/static/media/default.mp4"
+                                muted
+                                autoplay
+                                loop
+                                playsinline>
+                        </video>
+
+                        {{ end }}
+
                     </div>
 
-                    <span class="media-picker-hint">
-                        Нажмите, чтобы выбрать другое видео
+                </div>
+
+
+                <div class="media-picker">
+
+                    <span class="add-media-title">
+                        Фото
                     </span>
 
-                    <input
-                            class="media-file-input"
-                            type="file"
-                            accept="video/*">
-
-                </label>
-
-
-                <label class="media-picker">
-
-                <span class="add-media-title">
-                    Фото
-                </span>
-
                     <div class="add-media-preview-wide">
+
+                        {{ if .draft.Image }}
 
                         <img
                                 src="{{ .draft.Image }}"
                                 alt="{{ .draft.Name }}">
 
+                        {{ else }}
+
+                        <img
+                                src="/static/media/default.jpg"
+                                alt="Фото по умолчанию">
+
+                        {{ end }}
+
                     </div>
 
-                    <span class="media-picker-hint">
-                        Нажмите, чтобы выбрать другое фото
-                    </span>
-
-                    <input
-                            class="media-file-input"
-                            type="file"
-                            accept="image/*">
-
-                </label>
+                </div>
 
             </div>
 
 
-            <div class="draft-form">
+            <form
+                    class="draft-form"
+                    action="/electricity_consumers/publish"
+                    method="POST">
+
+                <!-- ID черновика пользователь не видит,
+                     но он отправляется на сервер -->
+                <input
+                        type="hidden"
+                        name="id"
+                        value="{{ .draft.ID }}">
+
 
                 <label class="form-label">
 
@@ -88,7 +115,20 @@
                     <input
                             class="form-input"
                             type="text"
-                            value="{{ .draft.Name }}">
+                            value="{{ .draft.Name }}"
+                            readonly>
+
+                </label>
+
+
+                <label class="form-label">
+
+                    Краткое описание
+
+                    <textarea
+                            class="form-textarea"
+                            name="description"
+                            required>{{ .draft.Description }}</textarea>
 
                 </label>
 
@@ -100,40 +140,159 @@
                     <input
                             class="form-input"
                             type="number"
+                            name="power_kw"
+                            min="0"
                             step="0.1"
-                            value='{{ printf "%.1f" .draft.PowerKW }}'>
+                            value='{{ printf "%.1f" .draft.PowerKW }}'
+                    required>
 
                 </label>
+
+                <p class="form-hint">
+                    Сила тока будет рассчитана автоматически по мощности.
+                </p>
+
+                <button
+                        class="form-button"
+                        type="submit">
+
+                    Опубликовать
+
+                </button>
+
+            </form>
+
+
+            {{ else }}
+
+            <!-- =========================================
+                 ЧЕРНОВИКА НЕТ -> создание услуги
+                 ========================================= -->
+
+            <form
+                    class="draft-form"
+                    action="/electricity_consumers/add"
+                    method="POST">
+
+
+                <div class="add-media-stack">
+
+                    <label class="media-picker">
+
+                        <span class="add-media-title">
+                            Видео
+                        </span>
+
+                        <div class="add-media-preview-wide">
+
+                            <video
+                                    src="/static/media/default.mp4"
+                                    muted
+                                    autoplay
+                                    loop
+                                    playsinline>
+                            </video>
+
+                        </div>
+
+                        <span class="media-picker-hint">
+                            Нажмите, чтобы выбрать видео
+                        </span>
+
+                        <!-- name специально НЕТ:
+                             файл не отправляется на сервер -->
+                        <input
+                                class="media-file-input"
+                                type="file"
+                                accept="video/*">
+
+                    </label>
+
+
+                    <label class="media-picker">
+
+                        <span class="add-media-title">
+                            Фото
+                        </span>
+
+                        <div class="add-media-preview-wide">
+
+                            <img
+                                    src="/static/media/default.jpg"
+                                    alt="Фото по умолчанию">
+
+                        </div>
+
+                        <span class="media-picker-hint">
+                            Нажмите, чтобы выбрать фото
+                        </span>
+
+                        <!-- name специально НЕТ:
+                             файл не отправляется на сервер -->
+                        <input
+                                class="media-file-input"
+                                type="file"
+                                accept="image/*">
+
+                    </label>
+
+                </div>
+
 
                 <label class="form-label">
 
-                    Описание
+                    Название
 
-                    <textarea
-                            class="form-textarea">{{ .draft.Description }}</textarea>
+                    <input
+                            class="form-input"
+                            type="text"
+                            name="name"
+                            placeholder="Введите название"
+                            required>
 
                 </label>
 
-            </div>
+
+                <button
+                        class="form-button"
+                        type="submit">
+
+                    Далее
+
+                </button>
+
+            </form>
+
+            {{ end }}
 
         </main>
 
 
         <nav class="bottom-nav">
 
-            <a href="/electricity_consumers/feed/1">
+            <a href="/electricity_consumers/feed/{{ .firstID }}">
+
                 <span class="nav-icon">⌂</span>
                 <span class="nav-text">Лента</span>
+
             </a>
 
-            <a href="/electricity_consumers/add" class="active">
+
+            <a
+                    href="/electricity_consumers/add"
+                    class="active">
+
                 <span class="nav-icon">＋</span>
                 <span class="nav-text">Добавить</span>
+
             </a>
 
+
             <a href="/electricity_consumers/catalog">
+
                 <span class="nav-icon">▦</span>
                 <span class="nav-text">Каталог</span>
+
             </a>
 
         </nav>
@@ -143,4 +302,5 @@
 </div>
 
 </body>
+
 </html>

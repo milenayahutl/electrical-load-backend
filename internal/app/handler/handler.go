@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"electricity_consumers/internal/app/ds"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +17,8 @@ import (
 type Handler struct {
 	Repository *repository.Repository
 }
+
+const currentUserID uint = 1
 
 // NewHandler создаёт новый handler и передаёт ему repository
 func NewHandler(r *repository.Repository) *Handler {
@@ -83,15 +87,27 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 
 // GetAddPage показывает черновик
 func (h *Handler) GetAddPage(ctx *gin.Context) {
-
-	draft, err := h.Repository.GetDraftElectricityConsumer()
+	draft, err := h.Repository.GetDraftElectricityConsumer(currentUserID)
 
 	if err != nil {
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusInternalServerError,
-			"Черновик не найден",
+			"Ошибка получения черновика",
+		)
+
+		return
+	}
+
+	firstID, err := h.Repository.GetNextElectricityConsumerID(0)
+
+	if err != nil {
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusInternalServerError,
+			"Ошибка получения услуги",
 		)
 
 		return
@@ -101,12 +117,12 @@ func (h *Handler) GetAddPage(ctx *gin.Context) {
 		http.StatusOK,
 		"add.html",
 		gin.H{
-			"draft": draft,
+			"draft":    draft,
+			"hasDraft": draft != nil,
+			"firstID":  firstID,
 		},
 	)
 }
-
-// 3. КАТАЛОГ
 
 func (h *Handler) GetCatalog(ctx *gin.Context) {
 
@@ -142,7 +158,7 @@ func (h *Handler) GetCatalog(ctx *gin.Context) {
 		64,
 	)
 
-	var electricityConsumers []repository.ElectricityConsumer
+	var electricityConsumers []ds.ElectricityConsumer
 	var err error
 
 	filterError := ""
@@ -168,12 +184,24 @@ func (h *Handler) GetCatalog(ctx *gin.Context) {
 	}
 
 	if err != nil {
-
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusInternalServerError,
 			"Ошибка получения электропотребителей",
+		)
+
+		return
+	}
+
+	firstID, err := h.Repository.GetNextElectricityConsumerID(0)
+
+	if err != nil {
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusInternalServerError,
+			"Ошибка получения услуги",
 		)
 
 		return
@@ -187,6 +215,189 @@ func (h *Handler) GetCatalog(ctx *gin.Context) {
 			"min_power":            minPowerStr,
 			"max_power":            maxPowerStr,
 			"filterError":          filterError,
+			"firstID":              firstID,
 		},
 	)
+}
+
+func (h *Handler) CreateDraft(ctx *gin.Context) {
+	name := strings.TrimSpace(ctx.PostForm("name"))
+
+	if name == "" {
+		ctx.String(
+			http.StatusBadRequest,
+			"Введите название",
+		)
+		return
+	}
+
+	_, err := h.Repository.CreateDraft(
+		currentUserID,
+		name,
+	)
+
+	if err != nil {
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusBadRequest,
+			err.Error(),
+		)
+		return
+	}
+
+	ctx.Redirect(
+		http.StatusFound,
+		"/electricity_consumers/add",
+	)
+}
+
+func (h *Handler) PublishDraft(ctx *gin.Context) {
+	id, err := strconv.ParseUint(
+		ctx.PostForm("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		ctx.String(
+			http.StatusBadRequest,
+			"Некорректный ID",
+		)
+		return
+	}
+
+	powerKW, err := strconv.ParseFloat(
+		strings.ReplaceAll(
+			ctx.PostForm("power_kw"),
+			",",
+			".",
+		),
+		64,
+	)
+
+	if err != nil {
+		ctx.String(
+			http.StatusBadRequest,
+			"Некорректная мощность",
+		)
+		return
+	}
+
+	description := strings.TrimSpace(
+		ctx.PostForm("description"),
+	)
+
+	if description == "" {
+		ctx.String(
+			http.StatusBadRequest,
+			"Введите описание",
+		)
+		return
+	}
+
+	if powerKW < 0 {
+		ctx.String(
+			http.StatusBadRequest,
+			"Мощность не может быть отрицательной",
+		)
+		return
+	}
+
+	err = h.Repository.PublishDraft(
+		uint(id),
+		currentUserID,
+		description,
+		powerKW,
+	)
+
+	if err != nil {
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusBadRequest,
+			err.Error(),
+		)
+		return
+	}
+
+	ctx.Redirect(
+		http.StatusFound,
+		fmt.Sprintf(
+			"/electricity_consumers/feed/%d",
+			id,
+		),
+	)
+}
+
+func (h *Handler) DeleteElectricityConsumer(ctx *gin.Context) {
+	id, err := strconv.ParseUint(
+		ctx.PostForm("id"),
+		10,
+		64,
+	)
+
+	if err != nil {
+		ctx.String(
+			http.StatusBadRequest,
+			"Некорректный ID",
+		)
+		return
+	}
+
+	err = h.Repository.DeleteElectricityConsumer(
+		uint(id),
+	)
+
+	if err != nil {
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusBadRequest,
+			err.Error(),
+		)
+		return
+	}
+
+	ctx.Redirect(
+		http.StatusFound,
+		"/electricity_consumers/catalog",
+	)
+}
+
+func (h *Handler) RegisterHandler(router *gin.Engine) {
+	router.GET(
+		"/electricity_consumers/feed/:id",
+		h.GetFeed,
+	)
+
+	router.GET(
+		"/electricity_consumers/add",
+		h.GetAddPage,
+	)
+
+	router.GET(
+		"/electricity_consumers/catalog",
+		h.GetCatalog,
+	)
+
+	router.POST(
+		"/electricity_consumers/add",
+		h.CreateDraft,
+	)
+
+	router.POST(
+		"/electricity_consumers/publish",
+		h.PublishDraft,
+	)
+
+	router.POST(
+		"/electricity_consumers/delete",
+		h.DeleteElectricityConsumer,
+	)
+}
+
+func (h *Handler) RegisterStatic(router *gin.Engine) {
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/static", "./resources")
 }
