@@ -853,18 +853,35 @@ select {
     font-size: 13px;
 }
 
-.card-body a {
-    color: #00b9ad;
+.card-actions a,
+.delete-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 28px;
+
+    padding: 6px 10px;
+
+    border: none;
+    border-radius: 16px;
+
+    background: #00b9ad;
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 600;
 
     text-decoration: none;
 
-    font-size: 13px;
-
-    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-.card-body a:hover {
-    text-decoration: underline;
+.card-actions a:hover,
+.delete-button:hover {
+    opacity: 0.9;
+    text-decoration: none;
 }
 
 
@@ -934,24 +951,6 @@ select {
 
 .card-actions form {
     margin: 0;
-}
-
-.delete-button {
-    border: none;
-    padding: 0;
-
-    background: transparent;
-
-    color: #d9534f;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.delete-button:hover {
-    text-decoration: underline;
 }
 
 .card-image-object {

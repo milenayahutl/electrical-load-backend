@@ -136,7 +136,7 @@ func (h *Handler) GetCatalog(ctx *gin.Context) {
 	maxPowerStr := strings.TrimSpace(
 		ctx.DefaultQuery(
 			"max_power",
-			"3",
+			"5",
 		),
 	)
 
