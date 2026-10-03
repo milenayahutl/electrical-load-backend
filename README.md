@@ -1,3 +1,3 @@
-# labs5sem-electrical-load
+# electrical-load-backend
 
 Лабораторные работы по разработке интернет приложений.
