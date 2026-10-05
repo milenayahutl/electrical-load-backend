@@ -22,9 +22,10 @@ type ElectricityConsumer struct {
 	PowerKW  float64 `gorm:"not null"`
 	CurrentA float64 `gorm:"not null"`
 
-	DateCreate    time.Time    `gorm:"not null"`
-	CreatorID     uint         `gorm:"not null"`
-	DateFormation sql.NullTime `gorm:"default:null"`
+	DateCreate     time.Time    `gorm:"not null"`
+	CreatorID      uint         `gorm:"not null"`
+	DateFormation  sql.NullTime `gorm:"default:null"`
+	DateCompletion sql.NullTime `gorm:"default:null"`
 
 	Creator User   `gorm:"foreignKey:CreatorID;constraint:OnDelete:RESTRICT;"`
 	Likes   []Like `gorm:"foreignKey:ElectricityConsumerID"`

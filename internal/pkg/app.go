@@ -32,8 +32,7 @@ func NewApp(
 func (a *Application) RunApp() {
 	logrus.Info("Server start up")
 
-	a.Handler.RegisterHandler(a.Router)
-	a.Handler.RegisterStatic(a.Router)
+	a.Handler.RegisterAPI(a.Router)
 
 	serverAddress := fmt.Sprintf(
 		"%s:%d",

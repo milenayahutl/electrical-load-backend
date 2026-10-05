@@ -32,31 +32,6 @@ func (r *Repository) GetElectricityConsumer(
 	return electricityConsumer, nil
 }
 
-// получение опубликованных услуг
-func (r *Repository) GetPublishedElectricityConsumers() (
-	[]ds.ElectricityConsumer,
-	error,
-) {
-
-	var electricityConsumers []ds.ElectricityConsumer
-
-	err := r.db.
-		Preload("Likes").
-		Where(
-			"status = ?",
-			ds.StatusPublished,
-		).
-		Order("id ASC").
-		Find(&electricityConsumers).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return electricityConsumers, nil
-}
-
-// получение черновика конкретного пользователя
 func (r *Repository) GetDraftElectricityConsumer(
 	creatorID uint,
 ) (*ds.ElectricityConsumer, error) {
@@ -148,51 +123,6 @@ func (r *Repository) GetNextElectricityConsumerID(
 	return int(first.ID), nil
 }
 
-// создание новой услуги-черновика через ORM
-func (r *Repository) CreateDraft(
-	creatorID uint,
-	name string,
-) (ds.ElectricityConsumer, error) {
-
-	// нет ли уже черновика
-	var oldDraft ds.ElectricityConsumer
-
-	err := r.db.
-		Where(
-			"creator_id = ? AND status = ?",
-			creatorID,
-			ds.StatusDraft,
-		).
-		First(&oldDraft).Error
-
-	if err == nil {
-		return ds.ElectricityConsumer{},
-			fmt.Errorf("у пользователя уже есть черновик")
-	}
-
-	if err != gorm.ErrRecordNotFound {
-		return ds.ElectricityConsumer{}, err
-	}
-
-	draft := ds.ElectricityConsumer{
-		Name:       name,
-		Status:     ds.StatusDraft,
-		Image:      "",
-		Video:      "",
-		PowerKW:    0,
-		CurrentA:   0,
-		DateCreate: time.Now(),
-		CreatorID:  creatorID,
-	}
-
-	err = r.db.Create(&draft).Error
-	if err != nil {
-		return ds.ElectricityConsumer{}, err
-	}
-
-	return draft, nil
-}
-
 // публикация черновика через ORM
 func (r *Repository) PublishDraft(
 	id uint,
@@ -230,32 +160,156 @@ func (r *Repository) PublishDraft(
 	return nil
 }
 
-// логическое удаление через ручной SQL UPDATE
-func (r *Repository) DeleteElectricityConsumer(
+// создаёт новый черновик услуги с именами изображения и видео
+func (r *Repository) CreateDraftWithMedia(
+	creatorID uint,
+	name string,
+	imageName string,
+	videoName string,
+) (ds.ElectricityConsumer, error) {
+
+	var oldDraft ds.ElectricityConsumer
+
+	err := r.db.
+		Where(
+			"creator_id = ? AND status = ?",
+			creatorID,
+			ds.StatusDraft,
+		).
+		First(&oldDraft).Error
+
+	if err == nil {
+		return ds.ElectricityConsumer{},
+			fmt.Errorf(
+				"у пользователя уже есть черновик",
+			)
+	}
+
+	if err != gorm.ErrRecordNotFound {
+		return ds.ElectricityConsumer{}, err
+	}
+
+	draft := ds.ElectricityConsumer{
+		Name:       name,
+		Status:     ds.StatusDraft,
+		Image:      imageName,
+		Video:      videoName,
+		PowerKW:    0,
+		CurrentA:   0,
+		DateCreate: time.Now(),
+		CreatorID:  creatorID,
+	}
+
+	err = r.db.Create(&draft).Error
+
+	if err != nil {
+		return ds.ElectricityConsumer{}, err
+	}
+
+	return draft, nil
+}
+
+//логическое удаление опубликованной услуги текущего пользователя
+func (r *Repository) SoftDeleteOwnElectricityConsumer(
 	id uint,
+	creatorID uint,
 ) error {
 
-	query := `
-		UPDATE electricity_consumers
-		SET status = ?
-		WHERE id = ?
-		  AND status = ?
-		RETURNING id
-	`
+	result := r.db.
+		Model(&ds.ElectricityConsumer{}).
+		Where(
+			"id = ? AND creator_id = ? AND status = ?",
+			id,
+			creatorID,
+			ds.StatusPublished,
+		).
+		Updates(map[string]interface{}{
+			"status":          ds.StatusDeleted,
+			"date_completion": time.Now(),
+		})
 
-	row := r.db.Raw(
-		query,
-		ds.StatusDeleted,
-		id,
-		ds.StatusPublished,
-	).Row()
+	if result.Error != nil {
+		return result.Error
+	}
 
-	var deletedID uint
-
-	err := row.Scan(&deletedID)
-	if err != nil {
-		return fmt.Errorf("услуга не найдена: %w", err)
+	if result.RowsAffected == 0 {
+		return fmt.Errorf(
+			"услуга не найдена или не принадлежит текущему пользователю",
+		)
 	}
 
 	return nil
+}
+
+func (r *Repository) SetLike(
+	userID uint,
+	consumerID uint,
+	value int,
+) error {
+
+	var consumer ds.ElectricityConsumer
+
+	err := r.db.
+		Where(
+			"id = ? AND status = ?",
+			consumerID,
+			ds.StatusPublished,
+		).
+		First(&consumer).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf(
+				"опубликованная услуга не найдена",
+			)
+		}
+
+		return err
+	}
+
+	// ПОСТАВИТЬ ЛАЙК
+
+	if value == 1 {
+
+		var oldLike ds.Like
+
+		err := r.db.
+			Where(
+				"user_id = ? AND electricity_consumer_id = ?",
+				userID,
+				consumerID,
+			).
+			First(&oldLike).Error
+
+		if err == nil {
+			return nil
+		}
+
+		if err != gorm.ErrRecordNotFound {
+			return err
+		}
+
+		like := ds.Like{
+			UserID:                userID,
+			ElectricityConsumerID: consumerID,
+		}
+
+		return r.db.Create(&like).Error
+	}
+
+	// СНЯТЬ ЛАЙК
+
+	if value == 0 {
+		return r.db.
+			Where(
+				"user_id = ? AND electricity_consumer_id = ?",
+				userID,
+				consumerID,
+			).
+			Delete(&ds.Like{}).Error
+	}
+
+	return fmt.Errorf(
+		"value должен быть равен 0 или 1",
+	)
 }
