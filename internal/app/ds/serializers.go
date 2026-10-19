@@ -12,7 +12,20 @@ type ElectricityConsumerResponse struct {
 	LikesCount int `json:"likes_count"`
 
 	IsCreator int `json:"is_creator"`
-	IsLiked   int `json:"is_liked"`
+}
+
+type ElectricityConsumerFeedResponse struct {
+	ID          uint    `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Image       string  `json:"image"`
+	Video       string  `json:"video"`
+	PowerKW     float64 `json:"power_kw"`
+	CurrentA    float64 `json:"current_a"`
+
+	LikesCount int `json:"likes_count"`
+
+	IsLiked int `json:"is_liked"`
 }
 
 type UserResponse struct {
@@ -39,7 +52,6 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-
 func ToElectricityConsumerResponse(
 	consumer ElectricityConsumer,
 	currentUserID uint,
@@ -49,15 +61,6 @@ func ToElectricityConsumerResponse(
 
 	if consumer.CreatorID == currentUserID {
 		isCreator = 1
-	}
-
-	isLiked := 0
-
-	for _, like := range consumer.Likes {
-		if like.UserID == currentUserID {
-			isLiked = 1
-			break
-		}
 	}
 
 	return ElectricityConsumerResponse{
@@ -70,7 +73,6 @@ func ToElectricityConsumerResponse(
 		CurrentA:    consumer.CurrentA,
 		LikesCount:  len(consumer.Likes),
 		IsCreator:   isCreator,
-		IsLiked:     isLiked,
 	}
 }
 
@@ -96,6 +98,33 @@ func ToElectricityConsumerResponseList(
 	}
 
 	return result
+}
+
+func ToElectricityConsumerFeedResponse(
+	consumer ElectricityConsumer,
+	currentUserID uint,
+) ElectricityConsumerFeedResponse {
+
+	isLiked := 0
+
+	for _, like := range consumer.Likes {
+		if like.UserID == currentUserID {
+			isLiked = 1
+			break
+		}
+	}
+
+	return ElectricityConsumerFeedResponse{
+		ID:          consumer.ID,
+		Name:        consumer.Name,
+		Description: consumer.Description,
+		Image:       consumer.Image,
+		Video:       consumer.Video,
+		PowerKW:     consumer.PowerKW,
+		CurrentA:    consumer.CurrentA,
+		LikesCount:  len(consumer.Likes),
+		IsLiked:     isLiked,
+	}
 }
 
 func ToUserResponse(user User) UserResponse {

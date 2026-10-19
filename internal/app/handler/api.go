@@ -11,12 +11,6 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 		h.GetElectricityConsumersAPI,
 	)
 
-	// лента без указанного id
-	api.GET(
-		"/electricity_consumers/feed",
-		h.GetFeedAPI,
-	)
-
 	// лента по конкретному id
 	api.GET(
 		"/electricity_consumers/feed/:id",

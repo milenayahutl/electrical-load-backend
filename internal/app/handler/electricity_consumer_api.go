@@ -89,17 +89,25 @@ func (h *Handler) GetElectricityConsumersAPI(
 func (h *Handler) GetFeedAPI(
 	ctx *gin.Context,
 ) {
-
 	idStr := ctx.Param("id")
 
-	var consumerID int
+	id, err := strconv.Atoi(idStr)
 
-	//если ID не указан, получаем первую опубликованную услугу
-	if idStr == "" {
+	if err != nil || id <= 0 {
+		ctx.Status(
+			http.StatusBadRequest,
+		)
+		return
+	}
 
-		firstID, err :=
+	consumerID := id
+
+	// если next=true, получаем следующую опубликованную услугу
+	if ctx.Query("next") == "true" {
+
+		nextID, err :=
 			h.Repository.GetNextElectricityConsumerID(
-				0,
+				id,
 			)
 
 		if err != nil {
@@ -111,40 +119,7 @@ func (h *Handler) GetFeedAPI(
 			return
 		}
 
-		consumerID = firstID
-
-	} else {
-
-		id, err := strconv.Atoi(idStr)
-
-		if err != nil || id <= 0 {
-			ctx.Status(
-				http.StatusBadRequest,
-			)
-			return
-		}
-
-		consumerID = id
-
-		//если next=true, получаем следующую опубликованную услугу
-		if ctx.Query("next") == "true" {
-
-			nextID, err :=
-				h.Repository.GetNextElectricityConsumerID(
-					id,
-				)
-
-			if err != nil {
-				logrus.Error(err)
-
-				ctx.Status(
-					http.StatusNotFound,
-				)
-				return
-			}
-
-			consumerID = nextID
-		}
+		consumerID = nextID
 	}
 
 	consumer, err :=
@@ -165,7 +140,7 @@ func (h *Handler) GetFeedAPI(
 		currentuser.GetCurrentUserID()
 
 	response :=
-		ds.ToElectricityConsumerResponse(
+		ds.ToElectricityConsumerFeedResponse(
 			consumer,
 			currentUserID,
 		)
@@ -217,7 +192,6 @@ func (h *Handler) GetDraftAPI(
 		response,
 	)
 }
-
 
 func getUploadedFileContentType(
 	header *multipart.FileHeader,
