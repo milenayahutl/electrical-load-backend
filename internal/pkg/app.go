@@ -1,13 +1,18 @@
+
 package pkg
 
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-
 	"electricity_consumers/internal/app/config"
 	"electricity_consumers/internal/app/handler"
+
+	_ "electricity_consumers/docs"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Application struct {
@@ -32,7 +37,14 @@ func NewApp(
 func (a *Application) RunApp() {
 	logrus.Info("Server start up")
 
+	// Регистрация методов API
 	a.Handler.RegisterAPI(a.Router)
+
+	// Страница Swagger
+	a.Router.GET(
+		"/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 
 	serverAddress := fmt.Sprintf(
 		"%s:%d",

@@ -10,8 +10,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// POST РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ
 
+ // RegisterUserAPI godoc
+ // @Summary Регистрация пользователя
+ // @Description Создание нового пользователя с логином и паролем
+ // @Tags Пользователи
+ // @Accept json
+ // @Produce json
+ // @Param user body ds.RegisterUserRequest true "Данные пользователя"
+ // @Success 201 {object} ds.UserResponse
+ // @Failure 400 {string} string "Некорректный запрос"
+ // @Failure 409 {string} string "Логин уже существует"
+ // @Router /users [post]
 func (h *Handler) RegisterUserAPI(
 	ctx *gin.Context,
 ) {

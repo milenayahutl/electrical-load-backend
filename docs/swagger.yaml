@@ -1,0 +1,417 @@
+basePath: /api
+definitions:
+  ds.ElectricityConsumerFeedResponse:
+    properties:
+      current_a:
+        type: number
+      description:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      is_liked:
+        type: integer
+      likes_count:
+        type: integer
+      name:
+        type: string
+      power_kw:
+        type: number
+      video:
+        type: string
+    type: object
+  ds.ElectricityConsumerResponse:
+    properties:
+      current_a:
+        type: number
+      description:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      is_creator:
+        type: integer
+      likes_count:
+        type: integer
+      name:
+        type: string
+      power_kw:
+        type: number
+      video:
+        type: string
+    type: object
+  ds.LikeRequest:
+    properties:
+      value:
+        type: integer
+    type: object
+  ds.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  ds.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  ds.PublishElectricityConsumerRequest:
+    properties:
+      description:
+        type: string
+      power_kw:
+        type: number
+    type: object
+  ds.RegisterUserRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  ds.UserResponse:
+    properties:
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Веб-сервис для учёта электрических приборов, расчёта электрического
+    тока и публикации услуг.
+  title: PowerCheck API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Проверка логина и пароля с выдачей JWT
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/ds.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.LoginResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "401":
+          description: Неверный логин или пароль
+          schema:
+            type: string
+      summary: Аутентификация пользователя
+      tags:
+      - Аутентификация
+  /auth/logout:
+    post:
+      description: Отзыв текущего JWT через Redis blacklist. Ответ без тела.
+      responses:
+        "200":
+          description: Успешный выход
+          schema:
+            type: string
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+        "503":
+          description: Redis недоступен
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Выход из системы
+      tags:
+      - Аутентификация
+  /electricity_consumers:
+    get:
+      description: Получение опубликованных услуг с фильтрацией по мощности
+      parameters:
+      - description: Минимальная мощность, кВт
+        in: query
+        name: min_power
+        type: number
+      - description: Максимальная мощность, кВт
+        in: query
+        name: max_power
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.ElectricityConsumerResponse'
+            type: array
+        "400":
+          description: Некорректный диапазон
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Получение списка электрических приборов
+      tags:
+      - Услуги
+    post:
+      consumes:
+      - multipart/form-data
+      description: Создание черновика с изображением и видео. Создатель определяется
+        по JWT.
+      parameters:
+      - description: Название электроприбора
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Изображение
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Видео
+        in: formData
+        name: video
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.ElectricityConsumerResponse'
+        "400":
+          description: Некорректные данные
+          schema:
+            type: string
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+        "409":
+          description: Черновик уже существует
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создание новой услуги
+      tags:
+      - Услуги
+  /electricity_consumers/{id}:
+    delete:
+      description: Логическое удаление опубликованной услуги создателем
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Успешное удаление
+          schema:
+            type: string
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+        "404":
+          description: Услуга не найдена или не принадлежит пользователю
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удаление своей услуги
+      tags:
+      - Услуги
+    put:
+      consumes:
+      - application/json
+      description: Обновление описания и мощности с расчётом силы тока. Публикация
+        доступна создателю.
+      parameters:
+      - description: ID черновика
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Описание и мощность
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ds.PublishElectricityConsumerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.ElectricityConsumerResponse'
+        "400":
+          description: Некорректный запрос или публикация невозможна
+          schema:
+            type: string
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Публикация услуги
+      tags:
+      - Услуги
+  /electricity_consumers/{id}/likes:
+    post:
+      consumes:
+      - application/json
+      description: Значение value=1 ставит лайк, value=0 снимает лайк
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Значение лайка
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ds.LikeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.ElectricityConsumerResponse'
+        "400":
+          description: Некорректные данные
+          schema:
+            type: string
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Установка или снятие лайка
+      tags:
+      - Услуги
+  /electricity_consumers/draft:
+    get:
+      description: Получение черновика текущего авторизованного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.ElectricityConsumerResponse'
+        "401":
+          description: Требуется авторизация
+          schema:
+            type: string
+        "404":
+          description: Черновик не найден
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получение черновика
+      tags:
+      - Услуги
+  /electricity_consumers/feed/{id}:
+    get:
+      description: Получение опубликованной услуги по ID или следующей услуги при
+        next=true
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Перейти к следующей услуге
+        in: query
+        name: next
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.ElectricityConsumerFeedResponse'
+        "400":
+          description: Некорректный ID
+          schema:
+            type: string
+        "404":
+          description: Услуга не найдена
+          schema:
+            type: string
+      summary: Получение ленты
+      tags:
+      - Лента
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создание нового пользователя с логином и паролем
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/ds.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.UserResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            type: string
+        "409":
+          description: Логин уже существует
+          schema:
+            type: string
+      summary: Регистрация пользователя
+      tags:
+      - Пользователи
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: Введите Bearer и JWT-токен через пробел
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
